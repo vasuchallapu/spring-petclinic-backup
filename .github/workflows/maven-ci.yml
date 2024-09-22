@@ -83,7 +83,7 @@ jobs:
 #---------------- release to GitHub Packages -------------------#
   release-Github:
     # needs: [opensource-security, code-security, build]
-    needs: [ build ]
+    # needs: [ build ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
