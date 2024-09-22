@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.springframework.samples</groupId>
   <artifactId>spring-petclinic</artifactId>
-  <version>3.3.2-SNAPSHOT</version>
+  <version>3.3.2</version>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
@@ -151,7 +151,7 @@
     <connection>scm:git:git://github.com/vasuchallapu/spring-petclinic.git</connection>
     <developerConnection>scm:git:https://github.com/vasuchallapu/spring-petclinic.git</developerConnection>
     <url>https://github.com/vanisett1/spring-petclinic</url>
-    <tag>HEAD</tag>
+    <tag>spring-petclinic-3.3.2</tag>
   </scm>
 
   <distributionManagement>
