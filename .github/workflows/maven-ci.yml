@@ -137,6 +137,7 @@ jobs:
   #         docker push ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:latest
 
   # ---------------- Release to Amazon ECR ---------------- #
+  
   release-ecr:
     runs-on: ubuntu-latest
     steps:
