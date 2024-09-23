@@ -81,60 +81,60 @@ jobs:
   #         command: code test
 
 #---------------- release to GitHub Packages -------------------#
-  release-Github:
-    # needs: [opensource-security, code-security, build]
-    # needs: [ build ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set up JDK 17
-        uses: actions/setup-java@v1
-        with:
-          java-version: 17
-      - name: Set Git user
-        run: |
-          git config user.email "actions@github.com"
-          git config user.name "GitHub Actions"
-      - name: Publish JAR to GitHub Packages
-        run: mvn -B release:prepare release:perform -DskipTests
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # # ---------------- Release to Docker Hub ---------------- #
-  # release-dockerhub:
+  # release-Github:
+  #   # needs: [opensource-security, code-security, build]
+  #   # needs: [ build ]
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-
-  #     # Set up JDK 17 for the Maven build
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         token: ${{ secrets.GITHUB_TOKEN }}
   #     - name: Set up JDK 17
   #       uses: actions/setup-java@v1
   #       with:
   #         java-version: 17
-
-  #     # Build the JAR file using Maven
-  #     - name: Build JAR with Maven
-  #       run: mvn clean package -DskipTests
-
-  #     # Build the Docker image
-  #     - name: Build Docker Image
+  #     - name: Set Git user
   #       run: |
-  #         docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:${{ github.sha }} .
-  #         docker tag ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:latest
+  #         git config user.email "actions@github.com"
+  #         git config user.name "GitHub Actions"
+  #     - name: Publish JAR to GitHub Packages
+  #       run: mvn -B release:prepare release:perform -DskipTests
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  #     # Login to Docker Hub
-  #     - name: Login to Docker Hub
-  #       run: |
-  #         echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+  # # ---------------- Release to Docker Hub ---------------- #
+  release-dockerhub:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-  #     # Push the Docker image to Docker Hub
-  #     - name: Push to Docker Hub
-  #       run: |
-  #         docker push ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:${{ github.sha }}
-  #         docker push ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:latest
+      # Set up JDK 17 for the Maven build
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      # Build the JAR file using Maven
+      - name: Build JAR with Maven
+        run: mvn clean package -DskipTests
+
+      # Build the Docker image
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:${{ github.sha }} .
+          docker tag ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:latest
+
+      # Login to Docker Hub
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      # Push the Docker image to Docker Hub
+      - name: Push to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:latest
 
   # ---------------- Release to Amazon ECR ---------------- #
   # release-ecr:
