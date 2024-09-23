@@ -103,41 +103,7 @@ jobs:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # # ---------------- Release to Docker Hub ---------------- #
-  release-dockerhub:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      # Set up JDK 17 for the Maven build
-      - name: Set up JDK 17
-        uses: actions/setup-java@v1
-        with:
-          java-version: 17
-
-      # Build the JAR file using Maven
-      - name: Build JAR with Maven
-        run: mvn clean package -DskipTests
-
-      # Build the Docker image
-      - name: Build Docker Image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:${{ github.sha }} .
-          docker tag ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:latest
-
-      # Login to Docker Hub
-      - name: Login to Docker Hub
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      # Push the Docker image to Docker Hub
-      - name: Push to Docker Hub
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:${{ github.sha }}
-          docker push ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:latest
-
-  # ---------------- Release to Amazon ECR ---------------- #
-  # release-ecr:
+  # release-dockerhub:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - name: Checkout code
@@ -153,37 +119,71 @@ jobs:
   #     - name: Build JAR with Maven
   #       run: mvn clean package -DskipTests
 
-  #     # Configure AWS credentials for authentication
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v2
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: us-east-1
-
-  #     # Create ECR repository (if it doesn't exist)
-  #     - name: Create ECR repository (if not exists)
-  #       run: |
-  #         aws ecr describe-repositories --repository-names spring-petclinic-app --region us-east-1 || \
-  #         aws ecr create-repository --repository-name spring-petclinic-app --region us-east-1
-
-  #     # Login to AWS ECR
-  #     - name: Login to AWS ECR
-  #       run: |
-  #         aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-
   #     # Build the Docker image
   #     - name: Build Docker Image
   #       run: |
-  #         docker build -t spring-petclinic-app:${{ github.sha }} .
-  #         docker tag spring-petclinic-app:${{ github.sha }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/spring-petclinic-app:${{ github.sha }}
-  #         docker tag spring-petclinic-app:${{ github.sha }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/spring-petclinic-app:latest
+  #         docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:${{ github.sha }} .
+  #         docker tag ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:latest
 
-  #     # Push the Docker image to Amazon ECR
-  #     - name: Push to ECR
+  #     # Login to Docker Hub
+  #     - name: Login to Docker Hub
   #       run: |
-  #         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/spring-petclinic-app:${{ github.sha }}
-  #         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/spring-petclinic-app:latest
+  #         echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+  #     # Push the Docker image to Docker Hub
+  #     - name: Push to Docker Hub
+  #       run: |
+  #         docker push ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:${{ github.sha }}
+  #         docker push ${{ secrets.DOCKER_USERNAME }}/spring-petclinic-app:latest
+
+  # ---------------- Release to Amazon ECR ---------------- #
+  release-ecr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Set up JDK 17 for the Maven build
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      # Build the JAR file using Maven
+      - name: Build JAR with Maven
+        run: mvn clean package -DskipTests
+
+      # Configure AWS credentials for authentication
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # Create ECR repository (if it doesn't exist)
+      - name: Create ECR repository (if not exists)
+        run: |
+          aws ecr describe-repositories --repository-names spring-petclinic-app --region us-east-1 || \
+          aws ecr create-repository --repository-name spring-petclinic-app --region us-east-1
+
+      # Login to AWS ECR
+      - name: Login to AWS ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+
+      # Build the Docker image
+      - name: Build Docker Image
+        run: |
+          docker build -t spring-petclinic-app:${{ github.sha }} .
+          docker tag spring-petclinic-app:${{ github.sha }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/spring-petclinic-app:${{ github.sha }}
+          docker tag spring-petclinic-app:${{ github.sha }} ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/spring-petclinic-app:latest
+
+      # Push the Docker image to Amazon ECR
+      - name: Push to ECR
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/spring-petclinic-app:${{ github.sha }}
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/spring-petclinic-app:latest
 
 
   # opensource-monitor:
